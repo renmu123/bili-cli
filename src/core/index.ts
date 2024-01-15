@@ -46,7 +46,7 @@ const getVideoInfo = async (bvid: string) => {
 
 export const download = async (
   options: {
-    bvid?: string;
+    bvid: string;
     output: string;
     cid?: number;
     part?: number;

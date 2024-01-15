@@ -65,6 +65,7 @@ Commands:
 
 # 开发
 
+api 基于[biliApi](https://github.com/renmu123/biliAPI)
 node 需要 18 及以上版本
 
 ## Install

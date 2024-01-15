@@ -1,11 +1,12 @@
 {
   "name": "bili-cli",
   "version": "0.1.0",
-  "description": "b站视频下载订阅工具",
+  "description": "b站视频下载订阅CLI",
   "type": "module",
   "scripts": {
     "dev": "rollup --config rollup-dev.config.js -w",
-    "build": "rollup --config rollup-dev.config.js"
+    "build": "rollup --config rollup-dev.config.js",
+    "publish": "pnpm run build && pnpm publish --access=public"
   },
   "keywords": [
     "bilibili",
@@ -19,8 +20,11 @@
     "node": ">=18"
   },
   "bin": {
-    "bili": "./dist/command.mjs"
+    "bili": "./bin/command.mjs"
   },
+  "files": [
+    "bin"
+  ],
   "devDependencies": {
     "@kineticcafe/rollup-plugin-delete": "3.0.0-beta.0",
     "@rollup/plugin-commonjs": "^25.0.7",
@@ -31,15 +35,15 @@
     "@types/fs-extra": "^11.0.4",
     "@types/node": "20.10.0",
     "@types/qrcode": "^1.5.5",
-    "rollup": "^4.9.2",
-    "rollup-plugin-dts": "^6.1.0",
-    "tslib": "^2.6.2",
-    "typescript": "^5.3.3"
-  },
-  "dependencies": {
     "cli-progress": "^3.12.0",
     "commander": "^11.1.0",
     "fs-extra": "^11.2.0",
-    "qrcode": "^1.5.3"
-  }
+    "qrcode": "^1.5.3",
+    "rollup": "^4.9.2",
+    "rollup-plugin-dts": "^6.1.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3",
+    "@renmu/bili-api": "^1.0.0"
+  },
+  "dependencies": {}
 }
