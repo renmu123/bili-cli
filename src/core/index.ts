@@ -141,4 +141,5 @@ export const subscribe = async () => {
       continue;
     }
   }
+  console.log("本次下载完成");
 };

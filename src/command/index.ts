@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import path from "node:path";
 import fs from "fs-extra";
 
@@ -141,7 +142,7 @@ subscribeSubCommand
     subscribe();
     setInterval(() => {
       subscribe();
-    }, 1000 * 60 * 10);
+    }, 1000 * 60 * interval);
   });
 
 const configSubCommand = program.command("config").description("配置项");
