@@ -1,6 +1,6 @@
 {
   "name": "@renmu/bili-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "b站视频下载订阅CLI",
   "type": "module",
   "scripts": {
@@ -20,7 +20,7 @@
     "node": ">=18"
   },
   "bin": {
-    "bili": "./bin/command.mjs"
+    "bili": "bin/command.js"
   },
   "files": [
     "bin"

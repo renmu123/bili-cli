@@ -49,7 +49,7 @@ program
       ffmpegBinPath?: string;
       cid?: number;
       part?: number;
-      bvid?: string;
+      bvid: string;
     } = {
       output: options.output,
       ffmpegBinPath: options.bin,

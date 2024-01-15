@@ -119,7 +119,6 @@ export const subscribe = async () => {
     const data = await readData();
 
     const shouldDownload = !data.find(d => d.bvid === media.bvid);
-    console.log(shouldDownload);
 
     if (!shouldDownload) continue;
     try {
