@@ -4,6 +4,8 @@
 
 # 安装
 
+`npm install @renmu/bili-cli -g`
+
 # CLI
 
 `bili download` 命令**依赖 ffmpeg**，默认使用环境变量，如果不存在最后会合并会报错，也可以手动传递可执行文件地址
