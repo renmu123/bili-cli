@@ -10,6 +10,7 @@ import { subscribe, download } from "../core/index";
 import qrcode from "qrcode";
 import { appPath, cookiePath, readConfig, writeConfig } from "../core/config";
 import { extractBVNumber } from "../utils/index";
+import logger from "../utils/log";
 
 const program = new Command();
 program.name("bili").description("b站命令行").version(version);
@@ -38,7 +39,6 @@ program
   .command("download [url]")
   .description("下载视频")
   .requiredOption("-o, --output <string>", "输出文件")
-  .option("-b, --bin <string>", "ffmpeg 二进制文件")
   .option("--cid <number>", "视频cid")
   .option("--part <number>", "分p位置，从0开始")
   .option("--bvid <string>", "视频bvid")
@@ -90,10 +90,16 @@ program
 const subscribeSubCommand = program
   .command("subscribe")
   .alias("sub")
-  .description("订阅")
+  .description("订阅");
+
+subscribeSubCommand
+  .command("download")
+  .description("下载订阅")
   .action(async () => {
+    logger.info("开始下载订阅");
     subscribe();
   });
+
 subscribeSubCommand
   .command("add")
   .description("添加一个up主到订阅")

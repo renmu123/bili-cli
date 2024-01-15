@@ -50,7 +50,6 @@ export const download = async (
     output: string;
     cid?: number;
     part?: number;
-    ffmpegBinPath?: string;
   },
   mediaOptions: {
     resolution?: number;
@@ -59,6 +58,8 @@ export const download = async (
   } = {}
 ) => {
   return new Promise(async (resolve, reject) => {
+    const config = await readConfig();
+    const ffmpegBinPath = config.ffmpegBinPath;
     // 创建进度条实例
     const progressBar = new SingleBar({
       format: "进度 |{bar}| {percentage}% | ETA: {eta}s | {value}/{total}",
@@ -69,7 +70,10 @@ export const download = async (
     const total = 100;
 
     const client = await getClient();
-    const downloader = await client.video.download(options, mediaOptions);
+    const downloader = await client.video.download(
+      { ...options, ffmpegBinPath },
+      mediaOptions
+    );
     progressBar.start(total, 0);
 
     downloader.on("completed", () => {
