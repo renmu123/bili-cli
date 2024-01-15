@@ -1,6 +1,6 @@
 {
   "name": "@renmu/bili-cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "b站视频下载订阅CLI",
   "type": "module",
   "scripts": {
