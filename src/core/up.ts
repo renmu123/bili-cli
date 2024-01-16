@@ -33,7 +33,6 @@ const subscribe = async (uid: number) => {
 const unSubscribe = async (uid: number) => {
   const config = await readConfig();
   const upList = config.upList;
-  console.log(upList);
   if (!upList.find(item => item.uid === uid)) {
     throw new Error("未订阅过该主播");
   }

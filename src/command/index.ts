@@ -3,6 +3,7 @@ import path from "node:path";
 import fs from "fs-extra";
 
 import { Command } from "commander";
+import type { Logger } from "winston";
 
 import { version } from "../../package.json";
 import up from "../core/up";
@@ -12,6 +13,14 @@ import { appPath, cookiePath, readConfig, writeConfig } from "../core/config";
 import { extractBVNumber } from "../utils/index";
 import logger from "../utils/log";
 
+declare global {
+  var logger: Logger;
+}
+global.logger = logger;
+process.on("uncaughtException", err => {
+  logger.error(err);
+});
+
 const program = new Command();
 program.name("bili").description("b站命令行").version(version);
 
@@ -19,16 +28,17 @@ program
   .command("login")
   .description("登录b站账号")
   .action(async () => {
+    logger.info(`请扫码登录，如果无法登录，`);
     const { url, tv } = await up.login();
     const qrcodePath = path.join(appPath, "qrcode.png");
     qrcode.toFile(qrcodePath, url);
-    console.log(
+    logger.info(
       `请扫码登录，如果无法登录，请前往打开${qrcodePath}二维码图片进行登录`
     );
     qrcode.toString(url, { type: "terminal", small: true }).then(console.log);
     tv.on("completed", async res => {
       await fs.writeJSON(cookiePath, res.data);
-      console.log("登录信息已保存");
+      logger.info("登录信息已保存");
     });
     tv.on("error", err => {
       console.error(err.message);
@@ -157,7 +167,7 @@ configSubCommand
   .description("显示配置项")
   .action(async () => {
     const config = await readConfig();
-    console.log(config);
+    logger.info(config);
   });
 
 configSubCommand

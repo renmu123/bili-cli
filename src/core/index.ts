@@ -119,6 +119,7 @@ export const subscribe = async () => {
 
   const data = await readData();
   mediaList = mediaList.filter(item => !data.find(d => d.bvid === item.bvid));
+  let size = 0;
   for (const media of mediaList) {
     const data = await readData();
 
@@ -126,7 +127,7 @@ export const subscribe = async () => {
 
     if (!shouldDownload) continue;
     try {
-      console.log(`正在下载: ${media.title}`);
+      logger.info(`正在下载: ${media.title}`);
       const item = {
         uid: media.uid,
         videoName: media.title,
@@ -139,11 +140,14 @@ export const subscribe = async () => {
       const filename = sanitizeFileName(`${media.title}.mp4`);
 
       await download({ bvid: media.bvid, output: path.join(folder, filename) });
+      size += 1;
     } catch (err) {
       await deleteData(media.bvid);
       console.error(err.message);
       continue;
     }
   }
-  console.log("本次下载完成");
+  if (size !== 0) {
+    logger.info(`本次下载完成，共下载${size}个视频`);
+  }
 };

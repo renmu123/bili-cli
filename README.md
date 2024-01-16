@@ -47,7 +47,7 @@ Commands:
 
 1. `downloadPath`: 下载路径，默认为`~/.bili-cli/videos`
 2. `ffmpegBinPath`: ffmpeg 可执行文件路径，默认使用当前文件夹及环境变量
-3. `logLevel`: log 等级，支持 error,warn,info,http,verbose,debug,silly
+3. `logLevel`: log 等级，支持 error,warn,info,debug
 
 ```bash
 Usage: bili config [options] [command]
