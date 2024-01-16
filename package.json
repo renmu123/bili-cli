@@ -2,6 +2,7 @@
   "name": "@renmu/bili-cli",
   "version": "0.2.0",
   "description": "b站视频下载订阅CLI",
+  "homepage": "https://github.com/renmu123/bili-cli",
   "type": "module",
   "scripts": {
     "dev": "rollup --config rollup-dev.config.js -w",
@@ -15,7 +16,7 @@
     "bili"
   ],
   "author": "renmu123",
-  "license": "GPL",
+  "license": "GPLv3",
   "engines": {
     "node": ">=18"
   },
