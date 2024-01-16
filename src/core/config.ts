@@ -32,7 +32,7 @@ interface Data {
 const defaultConfig: Config = {
   upList: [],
   downloadPath: path.join(appPath, "videos"),
-  ffmpegBinPath: "ffmpeg",
+  ffmpegBinPath: "",
   logLevel: "error",
 };
 

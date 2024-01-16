@@ -6,9 +6,38 @@
 
 `npm install @renmu/bili-cli -g`
 
-# CLI
+# 使用
 
-`bili download` 命令**依赖 ffmpeg**，默认使用环境变量，如果不存在最后会合并会报错，也可以手动传递可执行文件地址
+如果你想下载高画质视频，请登录，登录请运行`bili login`。  
+下载有两种模式，如果你设置了`ffmpegBinPath`参数，会采用 dash 流模式，该模式的画质更高，支持编码等参数选择。  
+如果你没有设置`ffmpegBinPath`参数，视频的分辨率大概最大是 720p。
+
+更多使用见`help`命令
+
+## 订阅
+
+### 添加订阅
+
+`bili sub add 10995238`
+
+### 移除订阅
+
+`bili sub remove 10995238`
+
+### 下载订阅
+
+`bili sub download`
+
+### 定时运行订阅
+
+默认十分钟运行一次
+`bili sub server`
+
+## 下载
+
+`bili download https://www.bilibili.com/video/BV1Vc41187Db`
+
+# 文档
 
 ```bash
 Usage: bili [options] [command]
@@ -36,9 +65,11 @@ Options:
   -h, --help       display help for command
 
 Commands:
-  add <number>     添加一个up主到订阅
-  remove <number>  移除一个订阅的up主
-  list             显示所有订阅
+  download          下载订阅
+  add <number>      添加一个up主到订阅
+  remove <number>   移除一个订阅的up主
+  list              显示所有订阅
+  server [options]  定时运行sub命令，默认十分钟运行一次
 ```
 
 ## 配置

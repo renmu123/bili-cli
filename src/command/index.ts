@@ -157,7 +157,11 @@ subscribeSubCommand
 
     subscribe();
     setInterval(() => {
-      subscribe();
+      try {
+        subscribe();
+      } catch (err) {
+        logger.error(err.message);
+      }
     }, 1000 * 60 * interval);
   });
 
@@ -167,7 +171,7 @@ configSubCommand
   .description("显示配置项")
   .action(async () => {
     const config = await readConfig();
-    logger.info(config);
+    console.info(config);
   });
 
 configSubCommand
