@@ -2,10 +2,11 @@ import os from "node:os";
 import path from "node:path";
 import fs from "fs-extra";
 
-export const appPath = path.join(os.homedir(), ".bili-subscribe");
+export const appPath = path.join(os.homedir(), ".bili-cli");
 export const configPath = path.join(appPath, "config.json");
 export const dataPath = path.join(appPath, "data.json");
 export const cookiePath = path.join(appPath, "cookie.json");
+export const logPath = path.join(appPath, "log.txt");
 
 fs.ensureDir(appPath);
 
@@ -16,6 +17,8 @@ interface Config {
     avatar: string;
   }[];
   downloadPath: string;
+  ffmpegBinPath: string;
+  logLevel: string;
 }
 
 interface Data {
@@ -29,6 +32,8 @@ interface Data {
 const defaultConfig: Config = {
   upList: [],
   downloadPath: path.join(appPath, "videos"),
+  ffmpegBinPath: "ffmpeg",
+  logLevel: "error",
 };
 
 export const readConfig = async (): Promise<Config> => {

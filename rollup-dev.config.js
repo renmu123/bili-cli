@@ -8,7 +8,7 @@ export default [
     input: "src/command/index.ts",
     output: [
       {
-        file: "bin/command.mjs",
+        file: "bin/command.js",
         format: "es",
         exports: "named",
       },

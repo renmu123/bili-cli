@@ -50,7 +50,6 @@ export const download = async (
     output: string;
     cid?: number;
     part?: number;
-    ffmpegBinPath?: string;
   },
   mediaOptions: {
     resolution?: number;
@@ -59,6 +58,8 @@ export const download = async (
   } = {}
 ) => {
   return new Promise(async (resolve, reject) => {
+    const config = await readConfig();
+    const ffmpegBinPath = config.ffmpegBinPath;
     // 创建进度条实例
     const progressBar = new SingleBar({
       format: "进度 |{bar}| {percentage}% | ETA: {eta}s | {value}/{total}",
@@ -69,7 +70,10 @@ export const download = async (
     const total = 100;
 
     const client = await getClient();
-    const downloader = await client.video.download(options, mediaOptions);
+    const downloader = await client.video.download(
+      { ...options, ffmpegBinPath },
+      mediaOptions
+    );
     progressBar.start(total, 0);
 
     downloader.on("completed", () => {
@@ -115,15 +119,15 @@ export const subscribe = async () => {
 
   const data = await readData();
   mediaList = mediaList.filter(item => !data.find(d => d.bvid === item.bvid));
+  let size = 0;
   for (const media of mediaList) {
     const data = await readData();
 
     const shouldDownload = !data.find(d => d.bvid === media.bvid);
-    console.log(shouldDownload);
 
     if (!shouldDownload) continue;
     try {
-      console.log(`正在下载: ${media.title}`);
+      logger.info(`正在下载: ${media.title}`);
       const item = {
         uid: media.uid,
         videoName: media.title,
@@ -136,10 +140,14 @@ export const subscribe = async () => {
       const filename = sanitizeFileName(`${media.title}.mp4`);
 
       await download({ bvid: media.bvid, output: path.join(folder, filename) });
+      size += 1;
     } catch (err) {
       await deleteData(media.bvid);
       console.error(err.message);
       continue;
     }
+  }
+  if (size !== 0) {
+    logger.info(`本次下载完成，共下载${size}个视频`);
   }
 };

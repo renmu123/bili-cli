@@ -1,6 +1,6 @@
 {
   "name": "@renmu/bili-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "b站视频下载订阅CLI",
   "type": "module",
   "scripts": {
@@ -20,13 +20,14 @@
     "node": ">=18"
   },
   "bin": {
-    "bili": "./bin/command.mjs"
+    "bili": "bin/command.js"
   },
   "files": [
     "bin"
   ],
   "devDependencies": {
     "@kineticcafe/rollup-plugin-delete": "3.0.0-beta.0",
+    "@renmu/bili-api": "^1.0.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
@@ -43,7 +44,6 @@
     "rollup-plugin-dts": "^6.1.0",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
-    "@renmu/bili-api": "^1.0.0"
-  },
-  "dependencies": {}
+    "winston": "^3.11.0"
+  }
 }

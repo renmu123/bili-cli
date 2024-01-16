@@ -4,6 +4,8 @@
 
 # 安装
 
+`npm install @renmu/bili-cli -g`
+
 # CLI
 
 `bili download` 命令**依赖 ffmpeg**，默认使用环境变量，如果不存在最后会合并会报错，也可以手动传递可执行文件地址
@@ -43,7 +45,9 @@ Commands:
 
 支持的配置项有：
 
-1. `downloadPath`: 下载路径，默认为`~/.bili-subscribe/videos`
+1. `downloadPath`: 下载路径，默认为`~/.bili-cli/videos`
+2. `ffmpegBinPath`: ffmpeg 可执行文件路径，默认使用当前文件夹及环境变量
+3. `logLevel`: log 等级，支持 error,warn,info,debug
 
 ```bash
 Usage: bili config [options] [command]
