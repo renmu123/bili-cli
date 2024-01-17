@@ -46,6 +46,17 @@ program
   });
 
 program
+  .command("logout")
+  .description("登出账号")
+  .action(async () => {
+    if (await fs.pathExists(cookiePath)) {
+      await fs.remove(cookiePath);
+    } else {
+      console.error("没有找到登录信息");
+    }
+  });
+
+program
   .command("download [url]")
   .description("下载视频")
   .requiredOption("-o, --output <string>", "输出文件")

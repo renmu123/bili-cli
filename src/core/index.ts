@@ -86,7 +86,6 @@ export const download = async (
     downloader.on("progress", event => {
       if (event.event === "download") {
         const percentage = Math.floor(event.progress.progress * 100);
-
         progressBar.update(percentage);
       }
     });
