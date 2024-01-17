@@ -8,9 +8,13 @@ export default [
     input: "src/command/index.ts",
     output: [
       {
-        file: "bin/command.js",
+        file: "bin/command.mjs",
         format: "es",
         exports: "named",
+      },
+      {
+        file: "bin/command.cjs",
+        format: "cjs",
       },
     ],
     plugins: [
