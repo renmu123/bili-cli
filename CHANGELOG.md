@@ -5,6 +5,7 @@
 1. 增加 log 记录
 2. 增加 ffmpegBinPath 和 logLevel 配置项
 3. 修改配置项默认地址
+4. 下载支持不配置 ffmpeg 模式，登录质量为 720p
 
 # 0.1.1
 
