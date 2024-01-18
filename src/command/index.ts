@@ -126,7 +126,7 @@ subscribeSubCommand
   .description("添加一个up主到订阅")
   .argument("<number>", "uid")
   .action((uid: number) => {
-    up.subscribe(uid);
+    up.subscribe(Number(uid));
   });
 
 subscribeSubCommand

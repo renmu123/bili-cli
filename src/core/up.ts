@@ -16,11 +16,13 @@ export const login = async () => {
 const subscribe = async (uid: number) => {
   const config = await readConfig();
   const upList = config.upList;
+
   if (upList.find(item => item.uid === uid)) {
     throw new Error("已经订阅过了");
   }
-
-  const data = await getUserInfo(uid);
+  const data = await getUserInfo(uid).catch(e => {
+    throw new Error(`${uid}: ${e.message}`);
+  });
   const item = {
     uid: data.mid,
     name: data.name,
