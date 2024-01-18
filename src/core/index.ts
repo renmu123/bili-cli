@@ -4,7 +4,7 @@ import { SingleBar } from "cli-progress";
 
 import fs, { ensureDir } from "fs-extra";
 import { Client } from "@renmu/bili-api";
-import { sanitizeFileName } from "../utils/index";
+import { sanitizeFileName, downloadFile } from "../utils/index";
 import {
   readData,
   pushData,
@@ -21,6 +21,9 @@ const getClient = async () => {
   return client;
 };
 
+/**
+ * 获取用户视频列表
+ */
 const getMediaList = async (uid: number) => {
   const client = await getClient();
   const data = await client.user.getVideos({
@@ -35,12 +38,32 @@ const getMediaList = async (uid: number) => {
 const getVideoInfo = async (bvid: string) => {
   const client = await getClient();
 
-  const data = await client.video.getInfo({
+  const data = await client.video.detail({
     bvid,
   });
   return data;
 };
 
+/**
+ * 下载封面
+ * @param bvid
+ * @param output
+ */
+export async function downloadCover(bvid: string, output: string) {
+  const data = await getVideoInfo(bvid);
+  const coverUrl = data.View.pic;
+  console.log(coverUrl);
+  await downloadFile(coverUrl, output, {
+    headers: {
+      Referer: "https://www.bilibili.com/",
+    },
+  });
+  return output;
+}
+
+/**
+ * 下载视频
+ */
 export const download = async (
   options: {
     bvid: string;
@@ -89,6 +112,9 @@ export const download = async (
   });
 };
 
+/**
+ * 订阅用户下载
+ */
 export const subscribe = async () => {
   const config = await readConfig();
   const downloadPath = config.downloadPath;

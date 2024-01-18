@@ -7,7 +7,7 @@ import type { Logger } from "winston";
 
 import { version } from "../../package.json";
 import up from "../core/up";
-import { subscribe, download } from "../core/index";
+import { subscribe, download, downloadCover } from "../core/index";
 import qrcode from "qrcode";
 import { appPath, cookiePath, readConfig, writeConfig } from "../core/config";
 import { extractBVNumber } from "../utils/index";
@@ -65,7 +65,9 @@ program
   .option("--bvid <string>", "视频bvid")
   .option("-vc ,--videoCodec <numer>", "7：H264，12：H265，13：AV1")
   .option("-w, --width <number>", "视频宽度")
-  .action((url: string, options: any) => {
+  .option("-c, --cover", "下载封面")
+  .option("-nv, --no-video", "不下载视频")
+  .action(async (url: string, options: any) => {
     const params: {
       output: string;
       ffmpegBinPath?: string;
@@ -105,7 +107,26 @@ program
       console.error("缺少视频id");
       return;
     }
-    download(params, mediaOptions);
+    console.log(options);
+    const config = await readConfig();
+    if (!path.isAbsolute(params.output)) {
+      params.output = path.join(config.downloadPath, params.output);
+    }
+    logger.info(`文件会被保存在 ${path.parse(params.output).dir} 目录下`);
+
+    if (options.cover) {
+      logger.info(`开始下载封面`);
+      await downloadCover(params.bvid, params.output).catch(err => {
+        logger.error("封面下载失败");
+        logger.error(err);
+      });
+    }
+    if (options.video) {
+      await download(params, mediaOptions).catch(err => {
+        logger.error("视频下载失败");
+        logger.error(err);
+      });
+    }
   });
 
 const subscribeSubCommand = program
@@ -117,7 +138,8 @@ subscribeSubCommand
   .command("download")
   .description("下载订阅")
   .action(async () => {
-    logger.info("开始下载订阅");
+    const config = await readConfig();
+    logger.info(`开始下载订阅，视频将会被保存在${config.downloadPath}文件中`);
     subscribe();
   });
 

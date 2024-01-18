@@ -2,6 +2,8 @@
 
 你还在担心你关注的 up 主被删视频吗？这个工具帮助你来自动下载备份视频。
 
+你也可以通过[视频](https://www.bilibili.com/video/BV1u94y1K7nr)来进行入门
+
 # 安装
 
 `npm install @renmu/bili-cli -g`
