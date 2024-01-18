@@ -23,15 +23,12 @@ const getClient = async () => {
 
 const getMediaList = async (uid: number) => {
   const client = await getClient();
-  const data = await client.user.getVideos(
-    {
-      mid: uid,
-      pn: 1,
-      ps: 5,
-      order: "pubdate",
-    },
-    true
-  );
+  const data = await client.user.getVideos({
+    mid: uid,
+    pn: 1,
+    ps: 5,
+    order: "pubdate",
+  });
   return data?.list?.vlist || [];
 };
 
