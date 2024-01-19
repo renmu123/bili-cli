@@ -120,7 +120,7 @@ export async function downloadMulti(
       logger.error(err);
     });
   }
-  if (!options.video) {
+  if (options.video) {
     const output = await normalizePath(
       videoOptions.output || options.output,
       config.downloadPath,

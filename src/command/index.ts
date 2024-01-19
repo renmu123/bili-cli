@@ -113,20 +113,6 @@ program
       return;
     }
 
-    // if (options.cover) {
-    //   logger.info(`开始下载封面`);
-    //   await downloadCover(params.bvid, params.output).catch(err => {
-    //     logger.error("封面下载失败");
-    //     logger.error(err);
-    //   });
-    // }
-    // if (options.video) {
-    //   await download(params, mediaOptions).catch(err => {
-    //     logger.error("视频下载失败");
-    //     logger.error(err);
-    //   });
-    // }
-
     await downloadMulti(
       {
         output: params.output,

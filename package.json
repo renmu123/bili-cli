@@ -27,6 +27,10 @@
   "files": [
     "bin"
   ],
+  "dependencies": {
+    "protobufjs": "^7.2.5",
+    "rollup-plugin-copy": "^3.5.0"
+  },
   "devDependencies": {
     "@kineticcafe/rollup-plugin-delete": "3.0.0-beta.0",
     "@renmu/bili-api": "^1.1.1",
@@ -41,8 +45,6 @@
     "cli-progress": "^3.12.0",
     "commander": "^11.1.0",
     "fs-extra": "^11.2.0",
-    "pkg": "^5.8.1",
-    "pkg-fetch": "^3.5.2",
     "qrcode": "^1.5.3",
     "rollup": "^4.9.2",
     "rollup-plugin-dts": "^6.1.0",
