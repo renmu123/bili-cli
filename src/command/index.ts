@@ -7,16 +7,13 @@ import type { Logger } from "winston";
 
 import { version } from "../../package.json";
 import up from "../core/up";
-import {
-  subscribe,
-  download,
-  downloadCover,
-  downloadMulti,
-} from "../core/index";
+import { subscribe, downloadMulti } from "../core/index";
 import qrcode from "qrcode";
 import { appPath, cookiePath, readConfig, writeConfig } from "../core/config";
 import { extractBVNumber } from "../utils/index";
 import logger from "../utils/log";
+
+import type { DownloadOptions } from "../types/index";
 
 declare global {
   var logger: Logger;
@@ -67,11 +64,15 @@ program
   .option("-o, --output <string>", "输出文件")
   .option("--cid <number>", "视频cid")
   .option("--part <number>", "分p位置，从0开始")
+  .option("--all", "下载所有分p")
   .option("--bvid <string>", "视频bvid")
   .option("-vc ,--videoCodec <numer>", "7：H264，12：H265，13：AV1")
   .option("-w, --width <number>", "视频宽度")
   .option("-c, --cover", "下载封面")
   .option("-nv, --no-video", "不下载视频")
+  .option("-d, --danmaku", "下载弹幕")
+  .option("-m, --meta", "视频信息")
+  .option("-r, --rewrite", "覆盖已存在的文件")
   .action(async (url: string, options: any) => {
     const params: {
       output?: string;
@@ -119,9 +120,12 @@ program
         bvid: params.bvid,
         cover: options.cover,
         video: options.video,
-        danmaku: true,
+        danmaku: options.danmaku,
         cid: params.cid,
         part: params.part,
+        downloadAll: options.all,
+        rewrite: options.rewrite,
+        meta: options.meta,
       },
       {},
       {
@@ -139,11 +143,23 @@ const subscribeSubCommand = program
 subscribeSubCommand
   .command("download")
   .description("下载订阅")
-  .action(async () => {
-    const config = await readConfig();
-    logger.info(`开始下载订阅，视频将会被保存在${config.downloadPath}文件中`);
-    subscribe();
-  });
+  .option("-f, --force", "强制下载，忽略验证")
+  .option("--all", "下载所有分p")
+  .option("-c, --cover", "下载封面")
+  .option("-d, --danmaku", "下载弹幕")
+  .option("-m, --meta", "视频信息")
+  .option("-nv, --no-video", "不下载视频")
+  .action(
+    async (
+      options: DownloadOptions & {
+        force?: boolean;
+      }
+    ) => {
+      const config = await readConfig();
+      logger.info(`开始下载订阅，视频将会被保存在${config.downloadPath}文件中`);
+      subscribe(options);
+    }
+  );
 
 subscribeSubCommand
   .command("add")
@@ -178,27 +194,38 @@ subscribeSubCommand
     "-i, --interval <number>",
     "时间间隔，单位分钟，默认10，请勿调整过低，以免撞上风控"
   )
-  .action(async (options: any) => {
-    let interval = 10;
-
-    if (options.interval) {
-      if (Number.isNaN(Number(options.interval))) {
-        console.error("时间间隔必须是数字");
-        return;
-      } else {
-        interval = Number(options.interval);
+  .option("--all", "下载所有分p")
+  .option("-c, --cover", "下载封面")
+  .option("-d, --danmaku", "下载弹幕")
+  .option("-m, --meta", "视频信息")
+  .option("-nv, --no-video", "不下载视频")
+  .action(
+    async (
+      options: DownloadOptions & {
+        interval?: number;
       }
+    ) => {
+      let interval = 10;
+
+      if (options.interval) {
+        if (Number.isNaN(Number(options.interval))) {
+          console.error("时间间隔必须是数字");
+          return;
+        } else {
+          interval = Number(options.interval);
+        }
+      }
+
+      subscribe(options);
+      setInterval(() => {
+        try {
+          subscribe(options);
+        } catch (err) {
+          logger.error(err.message);
+        }
+      }, 1000 * 60 * interval);
     }
-
-    subscribe();
-    setInterval(() => {
-      try {
-        subscribe();
-      } catch (err) {
-        logger.error(err.message);
-      }
-    }, 1000 * 60 * interval);
-  });
+  );
 
 const configSubCommand = program.command("config").description("配置项");
 configSubCommand

@@ -13,6 +13,8 @@ import {
   deleteData,
 } from "./config";
 
+import type { DownloadOptions } from "../types/index";
+
 const getClient = async () => {
   const client = new Client();
   if (await fs.exists(cookiePath)) {
@@ -47,22 +49,24 @@ const getVideoInfo = async (bvid: string) => {
 async function normalizePath(
   file: string | undefined,
   downloadPath: string,
-  defaultName: string
+  defaultName: string,
+  ext: string
 ) {
   let output = "";
   if (!file) {
     output = path.join(downloadPath, sanitizeFileName(defaultName));
   } else {
+    const { dir, name } = path.parse(file);
     if (path.isAbsolute(file)) {
-      output = file;
+      output = path.join(dir, sanitizeFileName(`${name}.${ext}`));
     } else {
-      output = path.join(downloadPath, sanitizeFileName(file));
+      output = path.join(downloadPath, sanitizeFileName(`${name}.${ext}`));
     }
   }
 
-  console.log(output);
   const { dir } = path.parse(output);
   await ensureDir(dir);
+
   return output;
 }
 
@@ -73,11 +77,14 @@ export async function downloadMulti(
   options: {
     output?: string;
     bvid: string;
-    cover: boolean;
-    video: boolean;
-    danmaku: boolean;
+    cover?: boolean;
+    video?: boolean;
+    danmaku?: boolean;
     cid?: number;
     part?: number;
+    downloadAll?: boolean;
+    rewrite?: boolean;
+    meta?: boolean;
   },
   coverOptions: {
     output?: string;
@@ -99,57 +106,121 @@ export async function downloadMulti(
   const config = await readConfig();
   const videoInfo = await getVideoInfo(options.bvid);
   const videoTitle = sanitizeFileName(videoInfo.View.title);
+  // console.log(videoInfo);
 
-  if (!options.cid) {
-    const pages = videoInfo.View?.pages || [];
-    let page = pages[options.part || 0];
-    if (!page) throw new Error("不存在符合要求的视频");
-
-    options.cid = page.cid;
+  if (options.meta) {
+    const output = await normalizePath(
+      options.output,
+      config.downloadPath,
+      `${videoTitle}`,
+      "json"
+    );
+    if (!(await fs.pathExists(output)) || options.rewrite) {
+      logger.info(`开始下载元数据，将会保存在：${output}`);
+      await fs.promises.writeFile(output, JSON.stringify(videoInfo.View));
+    } else {
+      logger.info(`元数据已存在，跳过下载`);
+    }
   }
 
   if (options.cover) {
     const output = await normalizePath(
       coverOptions.output || options.output,
       config.downloadPath,
-      `${videoTitle}.png`
+      `${videoTitle}`,
+      "png"
     );
-    logger.info(`开始下载封面，将会保存在：${output}`);
-    await downloadCover(videoInfo.View.pic, output).catch(err => {
-      logger.error("封面下载失败");
-      logger.error(err);
-    });
+    if (!(await fs.pathExists(output)) || options.rewrite) {
+      logger.info(`开始下载封面，将会保存在：${output}`);
+      await downloadCover(videoInfo.View.pic, output).catch(err => {
+        logger.error("封面下载失败");
+        logger.error(err);
+      });
+    } else {
+      logger.info(`封面已存在，跳过下载`);
+    }
   }
-  if (options.video) {
-    const output = await normalizePath(
-      videoOptions.output || options.output,
-      config.downloadPath,
-      `${videoTitle}.mp4`
-    );
-    const params = {
-      bvid: options.bvid,
-      output: output,
-      cid: options.cid,
-    };
-    logger.info(`开始下载视频，将会保存在：${output}`);
 
-    await download(params, videoOptions.mediaOptions).catch(err => {
-      logger.error("视频下载失败");
-      logger.error(err);
-    });
+  const cids = [];
+  if (!options.cid) {
+    const pages = videoInfo.View?.pages || [];
+    let page = pages[options.part || 0];
+    if (!page) throw new Error("不存在符合要求的视频");
+
+    options.cid = page.cid;
+    cids.push(page.cid);
   }
-  if (options.danmaku) {
-    const output = await normalizePath(
-      danmakuOptions.output || options.output,
-      config.downloadPath,
-      `${videoTitle}.xml`
-    );
-    logger.info(`开始下载弹幕，将会保存在：${output}`);
+  if (options.downloadAll) {
+    const pages = videoInfo.View?.pages || [];
+    for (const page of pages) {
+      cids.push(page.cid);
+    }
+  }
+  for (let i = 0; i < cids.length; i++) {
+    if (options.video) {
+      let output = "";
+      if (i === 0) {
+        output = await normalizePath(
+          videoOptions.output || options.output,
+          config.downloadPath,
+          `${videoTitle}`,
+          "mp4"
+        );
+      } else {
+        output = await normalizePath(
+          videoOptions.output || options.output,
+          config.downloadPath,
+          `${videoTitle}-P${i}`,
+          "mp4"
+        );
+      }
+      const params = {
+        bvid: options.bvid,
+        output: output,
+        cid: options.cid,
+      };
+      if (!(await fs.pathExists(output)) || options.rewrite) {
+        logger.info(`开始下载视频，将会保存在：${output}`);
 
-    await downloadDanmaku(options.cid, output, 1).catch(err => {
-      logger.error("弹幕下载失败");
-      logger.error(err);
-    });
+        await downloadVideo(params, videoOptions.mediaOptions).catch(err => {
+          logger.error("视频下载失败");
+          logger.error(err);
+        });
+      } else {
+        logger.info(`视频已存在，跳过下载`);
+      }
+    }
+    if (options.danmaku) {
+      let output = "";
+      if (i === 0) {
+        output = await normalizePath(
+          danmakuOptions.output || options.output,
+          config.downloadPath,
+          `${videoTitle}`,
+          "xml"
+        );
+      } else {
+        output = await normalizePath(
+          danmakuOptions.output || options.output,
+          config.downloadPath,
+          `${videoTitle}-P${i}`,
+          "xml"
+        );
+      }
+      if (!(await fs.pathExists(output)) || options.rewrite) {
+        logger.info(`开始下载弹幕，将会保存在：${output}`);
+        logger.info(`开始下载弹幕，将会保存在：${output}`);
+
+        logger.info(`开始下载弹幕，将会保存在：${output}`);
+
+        await downloadDanmaku(options.cid, output, 1).catch(err => {
+          logger.error("弹幕下载失败");
+          logger.error(err);
+        });
+      } else {
+        logger.info(`弹幕已存在，跳过下载`);
+      }
+    }
   }
 }
 
@@ -178,12 +249,10 @@ export async function downloadDanmaku(
   const client = await getClient();
   const buffers = [];
   for (let i = 1; i <= totalIndex; i++) {
-    console.log(cid);
     const buffer = await client.video.getDm({ cid, segment_index: i });
     buffers.push(buffer);
   }
   let combined = Buffer.concat(buffers);
-  // console.log(combined);
   const xmlContent = await utils.protoBufToXml(combined);
   await fs.promises.writeFile(output, xmlContent);
 }
@@ -191,7 +260,7 @@ export async function downloadDanmaku(
 /**
  * 下载视频
  */
-export const download = async (
+export const downloadVideo = async (
   options: {
     bvid: string;
     output: string;
@@ -242,7 +311,11 @@ export const download = async (
 /**
  * 订阅用户下载
  */
-export const subscribe = async () => {
+export const subscribe = async (
+  options: DownloadOptions & {
+    force?: boolean;
+  }
+) => {
   const config = await readConfig();
   const downloadPath = config.downloadPath;
   const upList = config.upList;
@@ -266,15 +339,13 @@ export const subscribe = async () => {
     mediaList.push(...videoList);
   }
 
-  const data = await readData();
-  mediaList = mediaList.filter(item => !data.find(d => d.bvid === item.bvid));
   let size = 0;
   for (const media of mediaList) {
     const data = await readData();
-
-    const shouldDownload = !data.find(d => d.bvid === media.bvid);
-
-    if (!shouldDownload) continue;
+    if (!options.force) {
+      const shouldDownload = !data.find(d => d.bvid === media.bvid);
+      if (!shouldDownload) continue;
+    }
     try {
       logger.info(`正在下载: ${media.title}`);
       const item = {
@@ -288,7 +359,11 @@ export const subscribe = async () => {
       await ensureDir(folder);
       const filename = sanitizeFileName(`${media.title}.mp4`);
 
-      await download({ bvid: media.bvid, output: path.join(folder, filename) });
+      await downloadMulti({
+        bvid: media.bvid,
+        output: path.join(folder, filename),
+        ...options,
+      });
       size += 1;
     } catch (err) {
       await deleteData(media.bvid);

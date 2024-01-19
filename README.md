@@ -38,7 +38,7 @@
 
 ## 下载
 
-`bili download https://www.bilibili.com/video/BV1Vc41187Db`
+`bili download https://www.bilibili.com/video/BV1u94y1K7nr`
 
 # 文档
 
@@ -53,7 +53,7 @@ Options:
 
 Commands:
   login                        登录b站账号
-  download [options] <number>  下载视频
+  download [options] [url]     下载视频
   subscribe|sub                订阅
   config                       配置项
   help [command]               display help for command
