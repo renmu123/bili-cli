@@ -3,7 +3,7 @@ import path from "node:path";
 import { SingleBar } from "cli-progress";
 
 import fs, { ensureDir } from "fs-extra";
-import { Client } from "@renmu/bili-api";
+import { Client, utils } from "@renmu/bili-api";
 import { sanitizeFileName, downloadFile } from "../utils/index";
 import {
   readData,
@@ -44,21 +44,148 @@ const getVideoInfo = async (bvid: string) => {
   return data;
 };
 
+async function normalizePath(
+  file: string | undefined,
+  downloadPath: string,
+  defaultName: string
+) {
+  let output = "";
+  if (!file) {
+    output = path.join(downloadPath, sanitizeFileName(defaultName));
+  } else {
+    if (path.isAbsolute(file)) {
+      output = file;
+    } else {
+      output = path.join(downloadPath, sanitizeFileName(file));
+    }
+  }
+
+  console.log(output);
+  const { dir } = path.parse(output);
+  await ensureDir(dir);
+  return output;
+}
+
+/**
+ * 下载视频,封面,弹幕
+ */
+export async function downloadMulti(
+  options: {
+    output?: string;
+    bvid: string;
+    cover: boolean;
+    video: boolean;
+    danmaku: boolean;
+    cid?: number;
+    part?: number;
+  },
+  coverOptions: {
+    output?: string;
+  } = {},
+  videoOptions: {
+    output?: string;
+
+    mediaOptions?: {
+      resolution?: number;
+      videoCodec?: 7 | 12 | 13;
+      audioQuality?: 30216 | 30232 | 30280 | 30250 | 30251;
+    };
+  } = {},
+  danmakuOptions: {
+    output?: string;
+    xml?: boolean;
+  } = {}
+) {
+  const config = await readConfig();
+  const videoInfo = await getVideoInfo(options.bvid);
+  const videoTitle = sanitizeFileName(videoInfo.View.title);
+
+  if (!options.cid) {
+    const pages = videoInfo.View?.pages || [];
+    let page = pages[options.part || 0];
+    if (!page) throw new Error("不存在符合要求的视频");
+
+    options.cid = page.cid;
+  }
+
+  if (options.cover) {
+    const output = await normalizePath(
+      coverOptions.output || options.output,
+      config.downloadPath,
+      `${videoTitle}.png`
+    );
+    logger.info(`开始下载封面，将会保存在：${output}`);
+    await downloadCover(videoInfo.View.pic, output).catch(err => {
+      logger.error("封面下载失败");
+      logger.error(err);
+    });
+  }
+  if (!options.video) {
+    const output = await normalizePath(
+      videoOptions.output || options.output,
+      config.downloadPath,
+      `${videoTitle}.mp4`
+    );
+    const params = {
+      bvid: options.bvid,
+      output: output,
+      cid: options.cid,
+    };
+    logger.info(`开始下载视频，将会保存在：${output}`);
+
+    await download(params, videoOptions.mediaOptions).catch(err => {
+      logger.error("视频下载失败");
+      logger.error(err);
+    });
+  }
+  if (options.danmaku) {
+    const output = await normalizePath(
+      danmakuOptions.output || options.output,
+      config.downloadPath,
+      `${videoTitle}.xml`
+    );
+    logger.info(`开始下载弹幕，将会保存在：${output}`);
+
+    await downloadDanmaku(options.cid, output, 1).catch(err => {
+      logger.error("弹幕下载失败");
+      logger.error(err);
+    });
+  }
+}
+
 /**
  * 下载封面
  * @param bvid
  * @param output
  */
-export async function downloadCover(bvid: string, output: string) {
-  const data = await getVideoInfo(bvid);
-  const coverUrl = data.View.pic;
-  console.log(coverUrl);
+export async function downloadCover(coverUrl: string, output: string) {
   await downloadFile(coverUrl, output, {
     headers: {
       Referer: "https://www.bilibili.com/",
     },
   });
   return output;
+}
+
+/**
+ * 下载弹幕
+ */
+export async function downloadDanmaku(
+  cid: number,
+  output: string,
+  totalIndex: number
+) {
+  const client = await getClient();
+  const buffers = [];
+  for (let i = 1; i <= totalIndex; i++) {
+    console.log(cid);
+    const buffer = await client.video.getDm({ cid, segment_index: i });
+    buffers.push(buffer);
+  }
+  let combined = Buffer.concat(buffers);
+  // console.log(combined);
+  const xmlContent = await utils.protoBufToXml(combined);
+  await fs.promises.writeFile(output, xmlContent);
 }
 
 /**

@@ -7,7 +7,12 @@ import type { Logger } from "winston";
 
 import { version } from "../../package.json";
 import up from "../core/up";
-import { subscribe, download, downloadCover } from "../core/index";
+import {
+  subscribe,
+  download,
+  downloadCover,
+  downloadMulti,
+} from "../core/index";
 import qrcode from "qrcode";
 import { appPath, cookiePath, readConfig, writeConfig } from "../core/config";
 import { extractBVNumber } from "../utils/index";
@@ -59,7 +64,7 @@ program
 program
   .command("download [url]")
   .description("下载视频")
-  .requiredOption("-o, --output <string>", "输出文件")
+  .option("-o, --output <string>", "输出文件")
   .option("--cid <number>", "视频cid")
   .option("--part <number>", "分p位置，从0开始")
   .option("--bvid <string>", "视频bvid")
@@ -69,7 +74,7 @@ program
   .option("-nv, --no-video", "不下载视频")
   .action(async (url: string, options: any) => {
     const params: {
-      output: string;
+      output?: string;
       ffmpegBinPath?: string;
       cid?: number;
       part?: number;
@@ -107,26 +112,37 @@ program
       console.error("缺少视频id");
       return;
     }
-    console.log(options);
-    const config = await readConfig();
-    if (!path.isAbsolute(params.output)) {
-      params.output = path.join(config.downloadPath, params.output);
-    }
-    logger.info(`文件会被保存在 ${path.parse(params.output).dir} 目录下`);
 
-    if (options.cover) {
-      logger.info(`开始下载封面`);
-      await downloadCover(params.bvid, params.output).catch(err => {
-        logger.error("封面下载失败");
-        logger.error(err);
-      });
-    }
-    if (options.video) {
-      await download(params, mediaOptions).catch(err => {
-        logger.error("视频下载失败");
-        logger.error(err);
-      });
-    }
+    // if (options.cover) {
+    //   logger.info(`开始下载封面`);
+    //   await downloadCover(params.bvid, params.output).catch(err => {
+    //     logger.error("封面下载失败");
+    //     logger.error(err);
+    //   });
+    // }
+    // if (options.video) {
+    //   await download(params, mediaOptions).catch(err => {
+    //     logger.error("视频下载失败");
+    //     logger.error(err);
+    //   });
+    // }
+
+    await downloadMulti(
+      {
+        output: params.output,
+        bvid: params.bvid,
+        cover: options.cover,
+        video: options.video,
+        danmaku: true,
+        cid: params.cid,
+        part: params.part,
+      },
+      {},
+      {
+        mediaOptions: mediaOptions,
+      },
+      {}
+    );
   });
 
 const subscribeSubCommand = program

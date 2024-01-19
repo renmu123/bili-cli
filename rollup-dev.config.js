@@ -5,6 +5,7 @@ import json from "@rollup/plugin-json";
 
 export default [
   {
+    external: [],
     input: "src/command/index.ts",
     output: [
       {
