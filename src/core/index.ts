@@ -14,11 +14,12 @@ import {
 } from "./config";
 
 import type { DownloadOptions } from "../types/index";
+import { exit } from "node:process";
 
 const getClient = async () => {
   const client = new Client();
   if (await fs.exists(cookiePath)) {
-    client.loadCookieFile(cookiePath);
+    await client.loadCookieFile(cookiePath);
   }
   return client;
 };
@@ -180,13 +181,13 @@ export async function downloadMulti(
         output: output,
         cid: options.cid,
       };
-      console.log(params);
       if (!(await fs.pathExists(output)) || options.rewrite) {
         logger.info(`开始下载视频，将会保存在：${output}`);
 
         await downloadVideo(params, videoOptions.mediaOptions).catch(err => {
           logger.error("视频下载失败");
-          logger.error(err);
+          console.error(err);
+          exit(1);
         });
       } else {
         logger.info(`视频已存在，跳过下载`);
