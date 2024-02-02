@@ -58,11 +58,12 @@ async function normalizePath(
   } else {
     const { dir, name } = path.parse(file);
     if (path.isAbsolute(file)) {
-      output = path.join(dir, sanitizeFileName(`${name}.${ext}`));
+      output = path.join(dir, sanitizeFileName(`${name}`));
     } else {
-      output = path.join(downloadPath, sanitizeFileName(`${name}.${ext}`));
+      output = path.join(downloadPath, sanitizeFileName(`${name}`));
     }
   }
+  if (!path.extname(output)) output += `.${ext}`;
 
   const { dir } = path.parse(output);
   await ensureDir(dir);
@@ -179,6 +180,7 @@ export async function downloadMulti(
         output: output,
         cid: options.cid,
       };
+      console.log(params);
       if (!(await fs.pathExists(output)) || options.rewrite) {
         logger.info(`开始下载视频，将会保存在：${output}`);
 
