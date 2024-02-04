@@ -63,15 +63,15 @@ program
   .description("下载视频")
   .option("-o, --output <string>", "输出文件")
   .option("--cid <number>", "视频cid")
-  .option("--part <number>", "分p位置，从0开始")
+  .option("-p, --part <number>", "分p位置，从0开始")
   .option("--all", "下载所有分p")
   .option("--bvid <string>", "视频bvid")
-  .option("-vc ,--videoCodec <numer>", "7：H264，12：H265，13：AV1")
+  .option("-vc, --videoCodec <numer>", "7：H264，12：H265，13：AV1")
   .option("-w, --width <number>", "视频宽度")
   .option("-c, --cover", "下载封面")
   .option("-nv, --no-video", "不下载视频")
   .option("-d, --danmaku", "下载弹幕")
-  .option("-m, --meta", "视频信息")
+  .option("-m, --meta", "下载视频元信息")
   .option("-r, --rewrite", "覆盖已存在的文件")
   .action(async (url: string, options: any) => {
     const params: {

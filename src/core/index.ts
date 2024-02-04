@@ -14,11 +14,12 @@ import {
 } from "./config";
 
 import type { DownloadOptions } from "../types/index";
+import { exit } from "node:process";
 
 const getClient = async () => {
   const client = new Client();
   if (await fs.exists(cookiePath)) {
-    client.loadCookieFile(cookiePath);
+    await client.loadCookieFile(cookiePath);
   }
   return client;
 };
@@ -58,11 +59,12 @@ async function normalizePath(
   } else {
     const { dir, name } = path.parse(file);
     if (path.isAbsolute(file)) {
-      output = path.join(dir, sanitizeFileName(`${name}.${ext}`));
+      output = path.join(dir, sanitizeFileName(`${name}`));
     } else {
-      output = path.join(downloadPath, sanitizeFileName(`${name}.${ext}`));
+      output = path.join(downloadPath, sanitizeFileName(`${name}`));
     }
   }
+  if (!path.extname(output)) output += `.${ext}`;
 
   const { dir } = path.parse(output);
   await ensureDir(dir);
@@ -185,7 +187,8 @@ export async function downloadMulti(
 
         await downloadVideo(params, videoOptions.mediaOptions).catch(err => {
           logger.error("视频下载失败");
-          logger.error(err);
+          console.error(err);
+          exit(1);
         });
       } else {
         logger.info(`视频已存在，跳过下载`);
