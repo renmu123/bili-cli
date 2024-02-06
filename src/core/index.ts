@@ -159,6 +159,7 @@ export async function downloadMulti(
     }
   }
   for (let i = 0; i < cids.length; i++) {
+    const cid = cids[i];
     if (options.video) {
       let output = "";
       if (i === 0) {
@@ -179,7 +180,7 @@ export async function downloadMulti(
       const params = {
         bvid: options.bvid,
         output: output,
-        cid: options.cid,
+        cid: cid,
       };
       if (!(await fs.pathExists(output)) || options.rewrite) {
         logger.info(`开始下载视频，将会保存在：${output}`);
@@ -212,11 +213,8 @@ export async function downloadMulti(
       }
       if (!(await fs.pathExists(output)) || options.rewrite) {
         logger.info(`开始下载弹幕，将会保存在：${output}`);
-        logger.info(`开始下载弹幕，将会保存在：${output}`);
 
-        logger.info(`开始下载弹幕，将会保存在：${output}`);
-
-        await downloadDanmaku(options.cid, output, 1).catch(err => {
+        await downloadDanmaku(cid, output, 1).catch(err => {
           logger.error("弹幕下载失败");
           logger.error(err);
         });
