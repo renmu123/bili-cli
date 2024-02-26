@@ -17,8 +17,8 @@ devDependencies:
     specifier: 3.0.0-beta.0
     version: 3.0.0-beta.0(rollup@4.9.5)
   '@renmu/bili-api':
-    specifier: ^1.1.1
-    version: 1.1.1
+    specifier: ^1.2.1
+    version: 1.2.1
   '@rollup/plugin-commonjs':
     specifier: ^25.0.7
     version: 25.0.7(rollup@4.9.5)
@@ -179,8 +179,8 @@ packages:
   /@protobufjs/utf8@1.1.0:
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
-  /@renmu/bili-api@1.1.1:
-    resolution: {integrity: sha512-/hNreILgbQ8j+CUt1nqEt692T6aJLLZgop/PgsTpCwGCxmbl/pX+YJ5i4LJb/cwamJSLALbXDAzBr8ZDqcgsqw==}
+  /@renmu/bili-api@1.2.1:
+    resolution: {integrity: sha512-1iNP0QgQN7+vq9UEnijwvJrlwvj+v58bjtYAsJjFIOqaOIxiIzV83fKFKkonOCs8kfCv5UW/eKZJoyoOmtnwXg==}
     engines: {node: '>=18'}
     dependencies:
       axios: 1.6.5
